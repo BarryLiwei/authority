@@ -1,0 +1,20 @@
+{
+  "name": "ueb-plug",
+  "version": "1.2.1",
+  "description": "UEB专用插件包,包含了登录,权限拦截,reqeust等与UEB业务相关的插件,仅限公司内部使用!",
+  "main": "lib/index.js",
+  "dependencies":{
+    "axios":"^0.16.2",
+    "js-cookie":"^2.1.4",
+    "vue": "^2.5.2",
+    "vue-router": "^3.0.1",
+    "vuex": "^2.4.1",
+    "element-ui":"^2.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["请求","axios","request","ueb"],
+  "author": "wangxiang",
+  "license": "ISC"
+}
