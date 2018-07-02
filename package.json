@@ -1,6 +1,6 @@
 {
   "name": "ueb-plug",
-  "version": "1.2.7",
+  "version": "1.2.26",
   "description": "UEB专用插件包,包含了登录,权限拦截,reqeust等与UEB业务相关的插件,仅限公司内部使用!",
   "main": "lib/index.js",
   "peerDependencies":{

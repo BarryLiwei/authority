@@ -3,25 +3,23 @@
             <el-table
                 v-bind="$attrs"
                 v-on="$listeners"
+                ref="uebTable"
                 v-on:page-change="pageChange"
                 :data="data"
                 stripe
                 border
+                :cell-class-name="handleCellClass"
                 :span-method="objectSpanMethod"
-                @header-click="handleHeaderClick"
-               >
+                @header-click="handleHeaderClick">
+                <slot></slot>
                <!--如果没有传入列属性 则跟 el-table写法一致-->
-               <template v-if="isCloumnSlot">
-                   <slot ></slot>
-               </template>
-               <template v-else v-for="tp in typesColumns">
+               <template  v-for="tp in typesColumns">
                     <el-table-column v-if="tp.type === 'expand'" 
                     v-bind="getColBind(tp)"
                     type="expand"
                     align="center"
                     header-align="center"
-                    :key="column.type"
-                    >
+                    :key="column.type">
                         <template slot-scope="props">
                             <slot name="expand" v-bind="props"></slot>
                         </template> 
@@ -33,27 +31,25 @@
                       v-bind="getColBind(tp)">
                     </el-table-column>
                </template>
-               <el-table-column v-for="col in renderColumns" 
-                    :resizable="col.resizable===true?true:false"
-                    :key="col.label"
-                    v-bind="getColBind(col)"
-                    align="left"
-                    >
-                    <template slot-scope="scope" inline-template>
-                       <span v-if="typeof col.formatter === 'function'" 
-                       v-html="col.formatter(scope.row,scope.column,scope.row[scope.column.property],scope.$index)">
-                       </span>
-                        <span v-else v-html="scope.row[scope.column.property]">
-                        </span>
-                    </template>
-                </el-table-column>
-                
+               <template v-for="col in renderColumns">
+                    <el-table-column v-if="typeof col.slot === 'undefined' || col.slot === null || col.slot === ''"
+                        :resizable="col.resizable===true?true:false"
+                        :key="col.label"
+                        v-bind="getColBind(col)"
+                        align="left">
+                        <template slot-scope="scope" inline-template>
+                            <span v-if="typeof col.formatter === 'function'" 
+                                 v-html="col.formatter(scope.row,scope.column,scope.row[scope.column.property],scope.$index)"></span>
+                            <span v-else v-html="scope.row[scope.column.property]"></span>
+                        </template>
+                    </el-table-column>
+                    <slot v-else :name="col.slot"></slot>
+               </template>
                 <slot name="btn"></slot>
                 <!--隐藏/显示列按钮-->
                 <el-table-column 
                     v-if="rowBtn"
-                    v-bind="rowBtnCloumns"
-                >
+                    v-bind="rowBtnCloumns">
                 </el-table-column>
             </el-table>
             <div class="table-page" v-if="paging">
@@ -64,9 +60,8 @@
                     :page-sizes="pageSizeOption"
                     :page-size="page.pageSize"
                     layout="total, sizes, prev, pager, next, jumper"
-                    :total="pageTotal"
-                    align="left"
-                >
+                    :total="total"
+                    align="left">
                 </el-pagination>
             </div>
             <!-- 选择列弹出窗 -->
@@ -77,22 +72,21 @@
               append-to-body>
               <el-transfer
                 style="text-align: left; display: inline-block"
-                v-model="value4"
-                :left-default-checked="[2, 3]"
-                :right-default-checked="[1]"
                 :titles="['隐藏字段', '显示字段']"
-                :format="{
-                    noChecked: '${total}',
-                    hasChecked: '${checked}/${total}'
-                }"
+                v-model="showColumn"
                 @change="handleChange"
-                :data="generateData">
-                <span slot-scope="{ option }">{{ option.key }} - {{ option.label }}</span>
+                :render-content="renderFunc"
+                :props="{
+                    key: 'id',
+                    label: 'label'
+                }"
+                :data="tableColumn">
+                    
                 </el-transfer>
 
              <span slot="footer" class="dialog-footer">
-                <el-button @click="dialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                <el-button @click="cancel">取 消</el-button>
+                <el-button type="primary" @click="save">确 定</el-button>
              </span>
             </el-dialog>
 
@@ -104,7 +98,7 @@
        
     
        const TYPES = ['selection', 'expand', 'index'];
-    
+       
        export default{
             name:'ueb-table',
             props:{
@@ -150,6 +144,29 @@
                 'rowBtn':{
                     type:Boolean,
                     default:true
+                }
+            },
+            data() {
+                return {
+                    pageSizeOption:this.sizeOption,
+                    isCloumnSlot:true,
+                    rowBtnCloumns: {
+                        'label':'...',//选择列是否隐藏
+                        'header-align':'center',
+                        'width':'50',
+                        'resizable':false,
+                        'label-class-name':'row-btn',
+                    },
+                    index:null,
+                    dialogVisible:false,
+                    //列属性
+                    tableColumn:[],
+                    showColumn:[],
+                    intitColumn:[],
+                    renderFunc:function(h, option){
+                        return <span>{ option.label }</span>;
+                    },
+                    page:this.pagination
                 }
             },
             computed:{
@@ -198,67 +215,35 @@
                             data['operation']=false;
                             result.push(data);
                         }
-                    }
-                    
+                    }                   
                     return result;
                 }
             },
             created(){
-                this.init();
-
+                this.initialization(); 
             },
-            data() {
-                const generateData = _ => {
-                    const data = [];
-                    for (let i = 1; i <= 15; i++) {
-                    data.push({
-                        key: i,
-                        label: `备选项 ${ i }`,
-                        disabled: i % 4 === 0
-                    });
-                    }
-                    return data;
-                };
-                return {
-                    pageTotal:0,
-                    page:{
-                        pageNum:1,
-                        pageSize:10
-                    },
-                    pageSizeOption:[10,25,50,100],
-                    isCloumnSlot:true,
-                    rowBtnCloumns: {
-                        'label':'...',//选择列是否隐藏
-                        'header-align':'center',
-                        'width':'50',
-                        'resizable':false,
-                        'label-class-name':'row-btn',
-                    },
-                    index:null,
-                    dialogVisible:false,
-                    tableColumn:[],
-                    generateData: generateData(),
-                    value3: [1],
-                    value4: [1],
-                    renderFunc(h, option) {
-                    return <span>{ option.key } - { option.label }</span>;
-                    }
-                }
-            },
-            watch:{
-                page:{
-                    deep: true,
-                    handler(newValue, oldValue){
-                        this.pageChange(newValue.pageNum,newValue.pageSize);
-                    }
-                }
-            },
+            mounted(){
+                this.initializationColums();
+            },    
             methods:{
-                handleChange(){
-
+                cancel(){
+                    this.showColumn = this.intitColumn;
+                    this.dialogVisible = false;
                 },
-                handleClose(){
-                    this.dialogVisible=false;
+                save(){
+                    var that = this;
+                    //隐藏列
+                    this.intitColumn = this.showColumn;
+                    this.visibleColumn();
+                   // console.log(this.$refs.uebTable.columns);
+                    this.$refs.uebTable.doLayout(); 
+                    this.dialogVisible = false;
+                },
+                handleCellClass({row, column, rowIndex, columnIndex}){
+                    //console.log(row,column,rowIndex,columnIndex);
+                },
+                handleChange(obj){
+                    this.showColumn = obj;
                 },
                 getColBind (col) {
                     const bind = Object.assign({}, col)
@@ -272,11 +257,13 @@
                     const handler = col.propsHandler
                     return handler && handler(props) || props
                 },
-                handleCurrentChange:function(val){
+                handleCurrentChange(val){
                     this.page.pageNum = val;
+                    this.$emit('page-change',this.page);
                 },
-                handleSizeChange:function(val){
+                handleSizeChange(val){
                     this.page.pageSize = val;
+                    this.$emit('page-change',this.page);
                 },
                 isAdd(arr,obj){
                     if(Array.isArray(arr)){
@@ -296,12 +283,8 @@
                     }
                     return true;
                 },
-                objectSpanMethod:function({ row, column, rowIndex, columnIndex }){
+                objectSpanMethod({ row, column, rowIndex, columnIndex }){
                     let {labelClassName,label} = column;
-                    if(this.isAdd(this.tableColumn,column)){
-                        //初始化列数据
-                        this.tableColumn.push(column);
-                    }
                     if('row-btn' === labelClassName && '...' === label){
                        this.index = columnIndex -1;
                        return [0,0]
@@ -310,30 +293,67 @@
                         return [1,2]
                     }
                 },
-                handleHeaderClick:function(column, event){
+                handleHeaderClick(column, event){
                     let {labelClassName,label} = column;
+                    var that=this;
                     if('row-btn' === labelClassName && '...' === label){
                      //选择隐藏/显示列 
-                     this.dialogVisible=true; 
-                     console.log(this.tableColumn);
+                     this.dialogVisible=true;     
                     }
                 },
-                init:function(){
-                   let {pageNum,pageSize} = this.pagination;
-                   let sizeOption = this.sizeOption;
-                   let total = this.total;
-                   //赋值 
-                   if(pageNum!== null && typeof pageNum !== 'undefined'&&pageNum>0){
-                       this.page.pageNum = pageNum;
-                   }
-                   if(pageSize!== null && typeof pageSize !== 'undefined'&&pageSize>0){
-                       this.page.pageSize = pageSize;
-                   }
-                   this.pageTotal = total;
-                   this.pageSizeOption = sizeOption;
-                   if(this.columns.length>0){
-                       this.isCloumnSlot=false;
-                   }
+                getColumn(val){
+                    for(let i in this.tableColumn){
+                        var item = this.tableColumn[i];
+                        var {id,type,property,label}=item;
+                        if(val === id){
+                            return item;
+                        }
+                    }
+                    return null;
+                },
+                visibleColumn(){
+                    var that = this;
+                    var columns = this.$refs.uebTable.columns;
+                    columns.forEach((element,index) => {
+                        var {id,type,property,label}=element;
+                        if(type === 'default' && typeof property !== 'undefined'&&typeof label !== 'undefined'){
+                            if(that.tableColumn.indexOf(element)!==-1){
+                                //还未隐藏 判断该列是否需要隐藏 如果需要隐藏 则删除掉该元素 
+                                if(that.showColumn.indexOf(id) === -1){                                   
+                                    // that.$refs.uebTable.columns.splice(index,1);       
+                                   element.visible = false;                        
+                                }    
+                            }else{
+                                //已经隐藏 判断该列是否需要显示
+                                if(that.showColumn.indexOf(id) !== -1){
+                                    //根据property 获取列属性
+                                    var obj=getColumn(id);   
+                                    if(obj !== null){
+                                        element.visible = true;        
+                                    //    that.$refs.uebTable.columns.splice(index,0,obj);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                },
+                initializationColums(){
+                    //初始化的时候把列属性 copy一份到tableColumn 属性上面   初始化需要显示的列 showColumn
+                   var that = this;
+                   this.$refs.uebTable.columns.forEach(element => {
+                        var {id,type,property,label}=element;
+                        if(type === 'default' && typeof property !== 'undefined'&&typeof label !== 'undefined'){
+                            that.tableColumn.push(element);
+                            that.showColumn.push(id);
+                            that.intitColumn.push(id);
+                        }
+                   });
+                   //TODO 从后台获取需要显示/隐藏的列
+                   
+                   this.visibleColumn();            
+                },
+                initialization(){
+                   
                 }
             }
         }
