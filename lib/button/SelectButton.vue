@@ -1,6 +1,6 @@
 <template>
      <el-button
-        size="mini"
+        :size="size"
         class="ueb-btn__select"        
         v-bind="$attrs" 
         v-on="$listeners"                
@@ -12,6 +12,12 @@ import ElButton from 'element-ui/lib/button'
 
 export default {
      name:'ueb-btn-select',
+     props:{
+         size:{
+             type:String,
+             default:'mini'
+         }
+     }
 }
 </script>
 <style lang="less" scoped>
