@@ -11,7 +11,6 @@
                 v-if="ix < 3 "
                 :key="item.id"
                 :label="item.name"
-                :closable="item.df !== true"
                 :name="item.id">
                 <ueb-search
                     :query-options="support.fields"
@@ -19,18 +18,19 @@
                     filtrate-type="2"
                     :support1="support"
                     :model="item.searchs">
-                    <custom-condition 
+                    <!-- <custom-condition 
                         ref="customCondition"
                         :data="item.searchs"
                         :support="support"
                         :is-remove="false"
                         :max="3" 
-                        field-style="max-width:25%;" 
+                        field-style="max-width:23%;"
+                        value-style="width:100%;" 
                         @change-field="fieldChange">
-                    </custom-condition>
+                    </custom-condition> -->
                 </ueb-search>
             </el-tab-pane>
-            <el-tab-pane name="more" class="more" v-if="more">
+            <!-- <el-tab-pane name="more" class="more" v-if="more">
                 <div class="more-btn">  
                     <el-dropdown trigger="click" @command="dropdownClick">
                         <el-button type="text">
@@ -52,7 +52,7 @@
                         </el-dropdown-menu>
                     </el-dropdown>
                 </div>
-                <!-- <custom-condition 
+                <custom-condition 
                     ref="customCondition"
                     :data="item.searchs"
                     :support="support"
@@ -60,18 +60,18 @@
                     :max="3" 
                     field-style="width:25%;" 
                     @change-field="fieldChange">
-                </custom-condition> -->
-            </el-tab-pane>
-            <el-tab-pane name="add" class="add">
+                </custom-condition> 
+            </el-tab-pane> -->
+            <!-- <el-tab-pane name="add" class="add">
                 <span slot="label" class="add-btn">
                     <i class="el-icon-plus"></i>
                 </span>
-            </el-tab-pane>
+            </el-tab-pane> -->
             <slot></slot>
         </el-tabs>  
-        <add-pane :support="support" ref="addPane" @save="handleSave">
+        <!-- <add-pane :support="support" ref="addPane" @save="handleSave">
 
-        </add-pane>
+        </add-pane> -->
     </div>
 </template>
 
@@ -98,23 +98,27 @@
             data:{
                 type:Array,
                 default:()=>[]
+            },
+            tabData:{
+                type:Array,
+                default:()=>[]
             }
         },
         data(){
             return {
                 activeName:'',
-                tabData:[],
                 more:false,
                 search:{},
                 visible:true,
                 formModel:{},
-                support:new Support(this.fields,this.data,this.defaultName)
+                td:[],
+                support:new Support(this.fields,this.tabData,this.defaultName)
             }
         }, 
         mounted(){
-            this.tabData = this.support.data
+            this.td = this.support.data
+            console.log(this.tabData)
             this.activeName = this.currentName = this.tabData[0].id
-            console.log(this.support.fields)
         }, 
         methods:{
             handleSave(obj){

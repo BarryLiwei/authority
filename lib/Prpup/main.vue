@@ -2,9 +2,9 @@
   <transition
     name="ueb-dialog-fade"
     @after-leave="afterLeave">
-    <div class="ueb-dialog__wrapper" v-show="visible" @click.self="handleWrapperClick">
+    <div class="ueb-dialog__wrapper" v-show="visible" @click.self="handleWrapperClick" >
       <div
-        class="el-dialog"
+        class="el-dialog ueb-dialog"
         :class="[{'is-fullscreen': fullscreen, 'el-dialog--center': center }, customClass]"
         ref="dialog"
         :style="style">
@@ -21,8 +21,13 @@
             <i class="el-dialog__close el-icon el-icon-close"></i>
           </button>
         </div>
-        <div class="el-dialog__body" v-if="rendered"><slot></slot></div>
-        <div class="el-dialog__footer" v-if="$slots.footer">
+          <div class="ueb-dialog__body">
+            
+              <div class="ueb-dialog__interval">
+                  <slot></slot>
+              </div>  
+          </div>
+        <div class="el-dialog__footer" v-if="$slots.footer" style="height: 25px;">
           <slot name="footer"></slot>
         </div>
       </div>
@@ -31,16 +36,22 @@
 </template>
 
 <script>
-  import Popup from 'element-ui/src/utils/popup';
+
+  import EasyScroll from 'easyscrolldt'
   import Migrating from 'element-ui/src/mixins/migrating';
   import emitter from 'element-ui/src/mixins/emitter';
   export default {
     name: 'ueb-dialog',
-    mixins: [Popup, emitter, Migrating],
+    mixins: [ emitter, Migrating],
+    components:{EasyScroll},
     props: {
       title: {
         type: String,
         default: ''
+      },
+      visible:{
+        type: Boolean,
+        default: false
       },
       modal: {
         type: Boolean,
@@ -81,7 +92,7 @@
       },
       top: {
         type: String,
-        default: '15vh'
+        default: '2px'
       },
       beforeClose: Function,
       center: {
@@ -91,10 +102,22 @@
     },
     data() {
       return {
-        closed: false
+        closed: false,
+        rendered:false,
+        uebVisible:false,
+        fullHeight: document.documentElement.clientHeight,
+        timer:false
       };
     },
-    watch: {
+    ready(){
+     
+    },
+    created(){
+    },
+    beforeDestroy(){
+      
+    },
+    watch: { 
       visible(val) {
         if (val) {
           this.closed = false;
@@ -110,6 +133,16 @@
           this.$el.removeEventListener('scroll', this.updatePopper);
           if (!this.closed) this.$emit('close');
         }
+      },
+      fullHeight(val){
+        if(!this.timer) {
+          this.fullHeight = val
+          this.timer = true
+          let that = this
+          setTimeout(function (){
+            that.timer = false
+          },400)
+        }
       }
     },
     computed: {
@@ -117,14 +150,23 @@
         let style = {};
         if (this.width) {
           style.width = this.width;
+          
         }
         if (!this.fullscreen) {
           style.marginTop = this.top;
         }
         return style;
+      },
+      bodyStyle(){
+        let style = {};
+        style.overflow="auto"
+        return style
       }
     },
     methods: {
+      handleResize(event){
+        this.fullHeight = document.documentElement.clientHeight
+      },
       getMigratingConfig() {
         return {
           props: {
@@ -156,6 +198,9 @@
       },
       afterLeave() {
         this.$emit('closed');
+      },
+      open(data){
+
       }
     },
     mounted() {
@@ -165,6 +210,14 @@
         if (this.appendToBody) {
           document.body.appendChild(this.$el);
         }
+      }
+      const that = this
+      window.onresize = () => {
+        return (() => {
+            if(!that.timer){
+                that.fullHeight =  document.documentElement.clientHeight
+            }  
+        })()
       }
     },
     destroyed() {
@@ -178,14 +231,30 @@
 
 <style lang='less' scoped>
    .ueb-dialog__wrapper{
-      position: fixed;
-      top: 70px;
+      position: absolute;
+      top:70px;
+      bottom: 5px;
       right: 0;
       bottom: 0;
-      overflow: auto;
       margin: 0;
-      width: 990px;
+      width: 1000px;
+      border-left:1px solid #e9eff6;
    }
+
+   .ueb-dialog__interval{
+    margin-left:15px;
+    margin-left: 15px;
+    height:100%; 
+    overflow: auto;
+   }
+   .ueb-dialog {
+        height: 900px;
+        margin: 0;
+    }
+
+    .ueb-dialog /deep/ .ueb-dialog__body {
+        height: 690px;
+    }
    .ueb-dialog-fade-enter-active{-webkit-animation:ueb-dialog-fade-in .3s;animation:ueb-dialog-fade-in .3s}
    .ueb-dialog-fade-leave-active{-webkit-animation:ueb-dialog-fade-out .3s;animation:ueb-dialog-fade-out .3s}
    @-webkit-keyframes ueb-dialog-fade-in{
@@ -230,24 +299,6 @@
         opacity:0
       }
     }
-    /* @keyframes dialog-fade-in {
-        0% {
-            transform: translate3d(100%,0, 0);
-            opacity: 0;
-        }
-        100% {
-            transform: translate3d(0, 0, 0);
-            opacity: 1;
-        }
-    }
-    @keyframes dialog-fade-out {
-        0% {
-            transform: translate3d(0, 0, 0);
-            opacity: 1;
-        }
-        100% {
-            transform: translate3d(100%,0, 0);
-            opacity: 0;
-        }
-    }    */
+
+   
 </style>

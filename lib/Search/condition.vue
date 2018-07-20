@@ -1,6 +1,6 @@
 <template>
     <span>
-        <el-form-item v-for="(condition,index) in formData"
+        <el-form-item v-for="(condition,index) in data"
             v-if="max < 1 || index < max" 
             :key="'formItem'+index" 
             :style="fieldStyle">
@@ -27,7 +27,7 @@
                     </el-option>
                 </el-select>
             </el-col>
-            <el-col :span="isRemove===true?10:12">
+            <el-col :span="addition===true?10:12">
                 <el-input :style="valueStyle" v-model="condition.value" :key="'text_'+index" placeholder="输入值" v-if="condition.type === 'text'"></el-input>
                 <el-select :style="valueStyle" placeholder="请选择" :key="'selected1_'+index" v-model="condition.value" :filterable="condition.search" v-else-if="condition.type === 'selected'">
                     <el-option
@@ -59,78 +59,47 @@
                     end-placeholder="结束日期">
                 </el-date-picker>
             </el-col>
-            <el-col v-if="isRemove && formData.length > 1" :span="2">
+            <el-col v-if="addition && data.length > 1" :span="2" >
                 <el-button type="text" @click="clear(condition)"><i class="el-icon-error el-icon--right"></i></el-button>
             </el-col>    
         </el-form-item>
     </span>
 </template>
 <script>
-    import Support from './support.js'
     export default{
-        name:'customCondition',
+        name:'ueb-condition',
         props:{
             data:{
-                required:false,
                 type:Array,
-                default:()=>[]
+                required:true
             },
-            isRemove:{
-                type:Boolean,
-                default:()=>true
-            },
-            valueStyle:{
-                type:String
-            },
-            fieldStyle:String,
-            support:{
-                type:Support,
-                default:()=>{return new Support([],[],'')}
-            },
-            addible:{
+            'addition':{
                 type:Boolean,
                 default:false
             },
             max:{
                 type:Number,
-                default:3
-            }
+                default:-1
+            },
+            valueStyle:{
+                type:String
+            },
+            fieldStyle:String,      
         },
         data(){
             return {
-                pickerOptions:{shortcuts: [{ text: '最近一周',onClick(picker) {const end = new Date();const start = new Date();start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);picker.$emit('pick', [start, end]);}}, {text: '最近一个月', onClick(picker) {const end = new Date();const start = new Date();start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);picker.$emit('pick', [start, end]);}}, {text: '最近三个月',onClick(picker) {const end = new Date();const start = new Date();start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);picker.$emit('pick', [start, end]);}}]},
-                formData:this.data
-            }
-        },
-        created(){
-            console.log("support",this.support,this.data)
-            if(this.formData.length<1){
-                //如果没有给初始值 则设置一条初始值
-                console.log(this.support)
-                this.formData = this.support.addCondition()
-            }
-        },
-        watch:{
-            formData:{
-                deep:true,
-                handler(curVal,oldVal){
-                    this.$emit('change-field',curVal)
-                }
+
             }
         },
         methods:{
             hc(val){
-                this.formData = this.support.fieldChange(this.formData)
-            },
-            add(){
-                //添加一条
-                this.formData = this.support.addCondition(this.formData)
+                //this.formData = this.support.fieldChange(this.formData)
+                this.$emit('change-field',this.data)
+                //this.$emit('change-field',this.model)
             },
             clear(obj){
-                this.formData = this.support.removeCondition(this.formData,obj)
-            },
-            getData(){
-                return this.formData
+               // this.formData = this.support.removeCondition(this.formData,obj)
+                this.$emit('remove-field',obj)
             }
         }
     }
