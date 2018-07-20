@@ -101,7 +101,8 @@
                                         </el-form>
                                         <div style="word-break:keep-all;word-wrap:normal;float:right;margin-right:20px;margin-top:20px;">
                                             <el-button @click="handleClick('reset')">重置</el-button>
-                                            <el-button type="primary" @click="handleClick('search')">查询</el-button>
+                                            <!-- <ueb-btn-confirm type="primary" @click="handleClick('search')">查询</ueb-btn-confirm> -->
+                                            <confirm-button @click="handleClick('search')"></confirm-button>
                                         </div>
                                     </el-col>
                                 </el-row>  
@@ -123,13 +124,23 @@
                                 <el-button type="text"  size="mini" icon="el-icon-plus" @click="add">添加条件</el-button>
                                 <div style="word-break:keep-all;word-wrap:normal;margin-left: 50%;">
                                     <el-button>重置</el-button>
-                                    <el-button type="primary" >查询</el-button>
+                                    <confirm-button></confirm-button>
                                 </div>
                             </div>
                         <!--两种格式-->
                         </span>
                         <el-button slot="reference" type="text" size="mini" :type="item.type" :icon="item.icon" style="margin-right: 10px;" @click="filtrateClick">{{item.name}}</el-button>
                     </el-popover>
+                    <confirm-button
+                        :type="item.type" 
+                        size="mini"
+                        style="margin-right: 10px;"
+                        :key="item.id"
+                        :icon="item.icon"
+                        @click="handleClick(item.id)"
+                        v-else-if="item.id === 'search'">
+
+                    </confirm-button>
                     <el-button v-else 
                         :type="item.type"
                         :icon="item.icon"
@@ -189,8 +200,9 @@
                 v-model="searchObj.context">
             </el-input>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="cancel">取 消</el-button>
-                <el-button type="primary" @click="batchSearch">查询</el-button>
+                <el-button size="medium" @click="cancel">取 消</el-button>
+                <!-- <el-button type="primary" @click="batchSearch">查询</el-button> -->
+                <confirm-button size="medium" @click="batchSearch"></confirm-button>
             </div>  
         </el-dialog>     
     </el-row>
@@ -208,9 +220,11 @@
 
     import UebCondition from './condition'
 
+    import ConfirmButton from './../button/SelectButton.vue'
+
     export default{
         name:'ueb-search',
-        components:{customCondition,UebCondition},
+        components:{customCondition,UebCondition,ConfirmButton},
         props:{
             ...ElForm.props,
             btns:{
