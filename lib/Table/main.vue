@@ -47,7 +47,7 @@
                         align="left">
                         <template slot-scope="scope" inline-template>
                             <span v-if="typeof col.formatter === 'function'" 
-                                 v-html="col.formatter(scope.row,scope.column,scope.row[scope.column.property],scope.$index)"></span>
+                                 v-html="getCellValue(col.formatter(scope.row,scope.column,scope.row[scope.column.property],scope.$index),scope.column,col)"></span>
                             <span v-else-if="typeof col.edit !== 'undefined'">
                                <span v-if="getEdit(scope.row,scope.column.property,scope.row[scope.column.property],scope.$index,col) !== true" 
                                     v-html="getCellValue(scope.row[scope.column.property],scope.column,col)">
