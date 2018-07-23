@@ -168,7 +168,7 @@
                 'sizeOption':{
                     required:false,
                     type:Array,
-                    default:()=>[20,50,100]
+                    default:()=>[20,50,100,200]
                 },
                 'total':{
                     required:false,
@@ -306,7 +306,6 @@
                         })
                     }
                    this.values.model = arr
-                   console.log('arr',arr)
                 },
                 getEdit(rows,prop,value,index,col){
                     let {edit} = col
@@ -450,7 +449,6 @@
                                 return 
                             }
                             let index = data.indexOf(row)
-                            console.log(index)
                             if(index !== -1){
                                 let newRow = func(row,val)
                                 if(typeof(newRow) === 'object' && Object.prototype.toString.call(newRow).toLowerCase() == '[object object]' && !newRow.length){
@@ -638,6 +636,7 @@
                     return result
                 },
                 validate(callback){
+                    let str = null
                     let refs = this.$refs
                     let flag = true
                     for(let o in refs){
@@ -647,6 +646,7 @@
                                 let {validate,validateField,clearValidate} = item[k]
                                 if(typeof validate === 'function' && typeof validateField === 'function' && typeof clearValidate==='function'){
                                     item[k].validate((valid)=>{
+                                        str = valid
                                         if(!valid){
                                             flag = false
                                         }
@@ -660,7 +660,8 @@
                             let {validate,validateField,clearValidate} = item
                             if(typeof validate === 'function' && typeof validateField === 'function' && typeof clearValidate==='function'){
                                 item.validate((valid)=>{
-                                    if(!valid){
+                                    str = valid
+                                    if(!valid){ 
                                         flag = false
                                     }
                                 })
@@ -670,7 +671,9 @@
                             break
                         }
                     }  
-                    callback(flag)
+                    if(typeof callback === 'function'){
+                        callback(str)
+                    }             
                 },
                 validateField(field,callback){
                     let refs = this.$refs

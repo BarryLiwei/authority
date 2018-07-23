@@ -170,7 +170,6 @@
                 this.$emit('input',arr)
                 this.$emit('update:reception',vals)
                 this.visible = false
-                console.log(this.label)
             },
             reasonCancel(){
                 this.visible = false

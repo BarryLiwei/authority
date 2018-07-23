@@ -21,7 +21,7 @@
             <i class="el-dialog__close el-icon el-icon-close"></i>
           </button>
         </div>
-          <div class="ueb-dialog__body">
+          <div class="ueb-dialog__body" :style="bodyStyle">
             
               <div class="ueb-dialog__interval">
                   <slot></slot>
@@ -160,6 +160,11 @@
       bodyStyle(){
         let style = {};
         style.overflow="auto"
+        let height = 680
+        if(!this.$slots.footer){
+          height = height+25
+        }
+        style.height=height+'px'
         return style
       }
     },
@@ -248,13 +253,11 @@
     overflow: auto;
    }
    .ueb-dialog {
-        height: 900px;
+        height: 860px;
         margin: 0;
     }
 
-    .ueb-dialog /deep/ .ueb-dialog__body {
-        height: 690px;
-    }
+   
    .ueb-dialog-fade-enter-active{-webkit-animation:ueb-dialog-fade-in .3s;animation:ueb-dialog-fade-in .3s}
    .ueb-dialog-fade-leave-active{-webkit-animation:ueb-dialog-fade-out .3s;animation:ueb-dialog-fade-out .3s}
    @-webkit-keyframes ueb-dialog-fade-in{

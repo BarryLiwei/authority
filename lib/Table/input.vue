@@ -1,23 +1,36 @@
 <template>
-    <span>
-        <el-date-picker
-            v-if="isContains(dateType,deploy.type) && deploy.timePicker!==true "
-            v-model="val"
-            type="deploy.type"
-            v-bind="getDatePickerBind(deploy)">
-        </el-date-picker>
-        <el-date-picker
-            v-else-if="isContains(dateType,deploy.type) && deploy.timePicker===true "
-            v-model="val"
-            type="deploy.type"
-            v-bind="getDatePickerBind(deploy)">
-        </el-date-picker>
-        <el-date-picker
-            v-else-if="deploy.timePicker===true "
-            v-model="val"
-            type="deploy.type"
-            v-bind="getDatePickerBind(deploy)">
-        </el-date-picker>
+    <span> 
+        <span  v-if="isContains(dateType,deploy.type) && deploy.timePicker!==true" class="el_col_time_container">
+            <span class="time_show_span" v-if="typeof deploy.name !=='undefined' && deploy.name !== null && deploy.name !==''">{{deploy.name}}:</span>
+            <el-date-picker
+            :style="style1"
+                v-model="val"
+                :type="deploy.type"
+                v-on="getListeners(deploy)"
+                v-bind="getDatePickerBind(deploy)">
+            </el-date-picker>
+        </span>
+        <span  v-else-if="isContains(dateType,deploy.type) && deploy.timePicker===true " class="el_col_time_container">
+            <span class="time_show_span" v-if="typeof deploy.name !=='undefined' && deploy.name !== null && deploy.name !==''">{{deploy.name}}:</span>
+            <el-date-picker
+                :style="style1"
+                v-model="val"
+                :type="deploy.type"
+                v-on="getListeners(deploy)"
+                v-bind="getDatePickerBind(deploy)">
+                
+            </el-date-picker>
+        </span>
+        <span  v-else-if="deploy.timePicker===true" class="el_col_time_container">
+            <span class="time_show_span" v-if="typeof deploy.name !=='undefined' && deploy.name !== null && deploy.name !==''">{{deploy.name}}:</span>
+            <el-date-picker
+                :style="style1"
+                v-model="val"
+                :type="deploy.type"
+                v-on="getListeners(deploy)"
+                v-bind="getDatePickerBind(deploy)">
+            </el-date-picker>
+        </span>
         <el-radio v-else-if="isContains('radio',deploy.type)" v-model="val" v-bind="getRadioBind(deploy)" v-on="getListeners(deploy)" >{{deploy.title || ''}}</el-radio>
         <el-checkbox  v-else-if="isContains('radio',deploy.type)"  v-model="val" v-bind="getRadioBind(deploy)" v-on="getListeners(deploy)">{{deploy.title || ''}}</el-checkbox>
         <el-input v-else-if="isContains('number',deploy.type)"  v-model="val" v-bind="getBind(deploy)" v-on="getListeners(deploy)"></el-input>
@@ -33,6 +46,7 @@
                 :value="item.value">
             </el-option>
         </el-select>
+        
         <el-input v-else  v-model="val" v-bind="getBind(deploy)" v-on="getListeners(deploy)"></el-input>
     </span>
 </template>
@@ -48,6 +62,12 @@
                 type:Object
             }
         },
+        computed:{
+            style1(){
+                let style={'width':'240px'}
+                return style
+            }
+        },
         data(){
             return {
                 //year/month/date/dates/ week/datetime/datetimerange/daterange
@@ -58,6 +78,14 @@
         watch:{
             val(val){
                 this.$emit('input',val)
+            },
+            value(val){
+                this.val = val
+            },
+            ignore(){
+                return {
+                    'listeners':null,rules:null,name:'',id:''
+                }
             }
         },
         methods:{
@@ -113,6 +141,7 @@
                 return false
             },
             getDatePickerBind(row){
+                let obj = this.ignoreRow(row)
                 return Object.assign({
                     'start-placeholder':'开始时间',
                     'end-placeholder':'结束时间',
@@ -122,26 +151,36 @@
                     'default-time':['00:00:00','23:59:59'],
                     'value-format':'yyyy-MM-dd HH:mm:ss',
                     size:'small'
-                },row,{'listeners':null,rules:null})
+                },obj)
+            },
+            ignoreRow(row){
+                let obj = Object.assign({},row)
+                delete obj.id
+                delete obj.name
+                delete obj.listeners
+                delete obj.rules
+                return obj
             },
             getRadioBind(row){
+                let obj = this.ignoreRow(row)
                 return Object.assign({
 
-                },row,{'listeners':null,rules:null})
+                },obj)
             },
             getSelectedBind(row){
+                let obj = this.ignoreRow(row)
                 return Object.assign({
                     placeholder:'请选择',
                     size:'small',
                     'value-key':'value',
-
-                },row,{'listeners':null,rules:null})
+                },obj)
             },
             getBind(row){
+                let obj = this.ignoreRow(row)
                 return Object.assign({
                     placeholder:'请输入值',
                     size:'small'
-                },row,{'listeners':null,rules:null})
+                },obj)
             },
             getListeners(obj){
                let result = Object.assign({},this.$listeners)
@@ -154,3 +193,6 @@
         }
     }
 </script>
+<style lang="less" scoped>
+   
+</style>
