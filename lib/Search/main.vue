@@ -514,13 +514,26 @@
                         context = strs.join(',')
                     }
                     let arr1 = context.split(',')
-                    if(Array.isArray(arr1)&&arr1.length>this.maxBatch){
+                    if(Array.isArray(arr1)&&arr1.length>0){
+                        let result = []
+                        arr1.forEach(item=>{
+                            if(typeof item !=='undefined' && item !== null && item!==''){
+                                result.push(item)
+                            }
+                        })
+                        if(typeof sc === 'undefined' || sc === null || sc === ''){
+                            this.$message.error('您还没有输入查询信息')
+                            return 
+                        }
+                        obj[fields]=context
+                        this.$emit('handle-search','batch',obj)
+                        this.visible = false;
+                    }else if(Array.isArray(arr1)&&arr1.length>this.maxBatch){
                         this.$message.error('批量查询最多只能查询'+this.maxBatch+'条数据哦');
                         return
-                    }
-                    obj[fields]=context
-                    this.$emit('handle-search','batch',obj)
-                    this.visible = false;
+                    }else{
+                        this.$message.error('您还没有输入查询信息')
+                    } 
                 },
                 fieldChange(){
     
