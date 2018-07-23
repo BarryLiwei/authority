@@ -521,11 +521,11 @@
                                 result.push(item)
                             }
                         })
-                        if(typeof sc === 'undefined' || sc === null || sc === ''){
+                        if(result.length<0){
                             this.$message.error('您还没有输入查询信息')
                             return 
                         }
-                        obj[fields]=context
+                        obj[fields]=result.join(',')
                         this.$emit('handle-search','batch',obj)
                         this.visible = false;
                     }else if(Array.isArray(arr1)&&arr1.length>this.maxBatch){
