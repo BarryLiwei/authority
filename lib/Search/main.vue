@@ -643,7 +643,6 @@
                     word-break:keep-all;
                 }
                 .el-radio{
-                    margin-left:0px;
                     margin-bottom: 10px;
                    
                 }
