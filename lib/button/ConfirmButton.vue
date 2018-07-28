@@ -12,6 +12,14 @@ import ElButton from 'element-ui/lib/button'
 
 export default {
      name:'ueb-btn-confirm',
+     props:{
+        
+     },
+     data(){
+         return {
+             
+         }
+     }
 }
 </script>
 <style lang="less" scoped>

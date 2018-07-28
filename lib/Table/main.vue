@@ -47,7 +47,7 @@
                         align="left">
                         <template slot-scope="scope" inline-template>
                             <span v-if="typeof col.formatter === 'function'" 
-                                 v-html="getCellValue(col.formatter(scope.row,scope.column,scope.row[scope.column.property],scope.$index),scope.column,col)"></span>
+                                 v-html="col.formatter(scope.row,scope.column,scope.row[scope.column.property],scope.$index)"></span>
                             <span v-else-if="typeof col.edit !== 'undefined'">
                                <span v-if="getEdit(scope.row,scope.column.property,scope.row[scope.column.property],scope.$index,col) !== true" 
                                     v-html="getCellValue(scope.row[scope.column.property],scope.column,col)">
@@ -168,7 +168,7 @@
                 'sizeOption':{
                     required:false,
                     type:Array,
-                    default:()=>[20,50,100,200]
+                    default:()=>[20,50,100]
                 },
                 'total':{
                     required:false,
@@ -636,7 +636,6 @@
                     return result
                 },
                 validate(callback){
-                    let str = null
                     let refs = this.$refs
                     let flag = true
                     for(let o in refs){
@@ -646,7 +645,6 @@
                                 let {validate,validateField,clearValidate} = item[k]
                                 if(typeof validate === 'function' && typeof validateField === 'function' && typeof clearValidate==='function'){
                                     item[k].validate((valid)=>{
-                                        str = valid
                                         if(!valid){
                                             flag = false
                                         }
@@ -660,8 +658,7 @@
                             let {validate,validateField,clearValidate} = item
                             if(typeof validate === 'function' && typeof validateField === 'function' && typeof clearValidate==='function'){
                                 item.validate((valid)=>{
-                                    str = valid
-                                    if(!valid){ 
+                                    if(!valid){
                                         flag = false
                                     }
                                 })
@@ -671,9 +668,7 @@
                             break
                         }
                     }  
-                    if(typeof callback === 'function'){
-                        callback(str)
-                    }             
+                    callback(flag)
                 },
                 validateField(field,callback){
                     let refs = this.$refs

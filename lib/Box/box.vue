@@ -10,7 +10,11 @@
                 </slot>
             </div>
             <div class="ueb-chunk__body" v-show="open" :style="style">
-                <el-form class="ueb-chunk__form" ref="Form" v-bind="$attrs" v-on="$listeners" size="mini" label-width="130px"
+                <el-form class="ueb-chunk__form" 
+                    ref="Form" 
+                    v-bind="$attrs" 
+                    v-on="$listeners" size="mini" 
+                    label-width="130px"
                      v-if="$slots.right && isForm === true">
                     <el-row class="">
                         <el-col :span="12" class="ueb-chunk__left">
@@ -44,7 +48,6 @@
         export default{
             name:'ueb-box',
             props:{
-                ...ElForm.props,
                 title:{
                     type:String,
                     default:''

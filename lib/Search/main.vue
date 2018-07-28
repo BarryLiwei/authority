@@ -19,6 +19,7 @@
                     </custom-condition> -->
                     <ueb-condition :data="data" 
                         v-if="filtrateType === 2"
+                        width="240"
                         @change-field="changeField" 
                         @remove-field="removeField"
                         :max="2"  
@@ -30,7 +31,9 @@
                             :key="'ElForm___'+index" >
                             <ueb-redact 
                                 :deploy="item"
+                                inline
                                 :options="options"
+                                @change="(val)=>handleChange(val,item)"
                                 v-model="model[item.id]">
                             </ueb-redact>
                         </el-form-item>  
@@ -74,7 +77,16 @@
                                                         <span v-if="typeof item.slot!=='undefined'&&item.slot!==null&&item.slot !=='' && !$slots[item.slot]">
                                                             <slot name="item.slot"></slot>
                                                         </span>
-                                                        <el-select style="width: 200px;" 
+                                                        <ueb-redact 
+                                                            value-style="width:200px" 
+                                                            :width="200"
+                                                            v-else
+                                                            :deploy="item"
+                                                            :options="options"
+                                                            @change="(val)=>handleChange(val,item)"
+                                                            v-model="model[item.id]">
+                                                        </ueb-redact>
+                                                        <!-- <el-select style="width: 200px;" 
                                                             :placeholder="item.placeholder||'请选择'" 
                                                             :key="'selected-'+index" 
                                                             v-model="model[item.id]" 
@@ -107,7 +119,7 @@
                                                             style="width: 200px;" 
                                                             :placeholder="item.placeholder||'请输入值'" 
                                                             v-else>
-                                                        </el-input>
+                                                        </el-input> -->
                                                     </el-form-item>
                                                 </el-col> 
                                             </el-form>
@@ -273,6 +285,10 @@
                 maxBatch:{
                     type:Number,
                     default:1000
+                },
+                initSearch:{
+                    type:Boolean,
+                    default:false
                 }
             },
             data(){
@@ -294,13 +310,19 @@
             },
             created(){
                 this.recordSearchObj = Object.assign({},this.searchObj)
-                this.batchBackups = this.recordSearchObj
+                this.batchBackups = this.recordSearchObj       
             }, 
             mounted(){
                 if(this.filtrateType !== '1' || this.filtrateType !== 1){
                     this.ds = new Support(this.queryOptions,[],'')
                     this.ds.addCondition(this.data)
+                } 
+                //初始化model
+                if(this.initSearch){
+                    this.search()
                 }
+                let model = this.model||{}
+                this.modelCache = Object.assign({},model)
             },
             computed:{
                 searchcolumns(){
@@ -315,17 +337,29 @@
                         }
                     }
                     return arr
+                },
+                //生成的标签
+                tags(){
+    
                 }
             },
             methods:{
+                handleChange(val,item){
+                    let {transition} = item
+                    if(typeof transition === 'function'){
+                        let obj = transition(val)
+                        if(this.support._isJson(obj)){
+                            Object.assign(this.support.model,obj)
+                        }
+                    }
+                },
                 filtrateClick(){
                     if(!this.isFiltrate){
                         this.isFiltrate=true
                     }
                 },
                 skip(type){
-                    this.btnType = type
-                     
+                    this.btnType = type   
                 },
                 paperScroll(e){
                     //console.log(123,e.scrollTop)
@@ -406,7 +440,9 @@
                 reset(){
                     Object.assign(this.batchBackups,this.recordSearchObj)
                     Object.assign(this.searchObj,this.batchBackups);
+                    Object.assign(this.model,this.modelCache)
                     this.searchTag = this.support.clearTag(this.searchTag,'all',this.model)
+                    //this.modelCache
                     this.$emit('input',this.model)
                     this.$emit('handle-search','reset',this.model)
                 },
@@ -443,11 +479,13 @@
                 search(){
                     Object.assign(this.batchBackups,this.recordSearchObj)
                     Object.assign(this.searchObj,this.batchBackups);
+                    //transition
                     let func = this.transformFields
                     if(typeof this.transformFields !== 'function'){
                         func = this.transformOptionsFields
                     }
                     this.searchTag = this.support.builderTag(this.model,func,this.options)
+
                     //查询
                     this.$emit('handle-search','search',this.model)
                 },
@@ -473,7 +511,7 @@
                 },
                 trim(s){
                     if(Object.prototype.toString.call(s) === '[object String]'){
-                        return s
+                        return s.replace(/(^\s*)|(\s*$)/g, "")
                     }
                     return s.replace(/(^\s*)|(\s*$)/g, "")
                 },
@@ -518,19 +556,20 @@
                         let result = []
                         arr1.forEach(item=>{
                             if(typeof item !=='undefined' && item !== null && item!==''){
-                                result.push(item)
+                                result.push(this.trim(item))
                             }
                         })
-                        if(result.length<0){
+                        if(result.length<=0){
                             this.$message.error('您还没有输入查询信息')
                             return 
+                        }
+                        if(result.length>this.maxBatch){
+                            this.$message.error('批量查询最多只能查询'+this.maxBatch+'条数据哦');
+                            return
                         }
                         obj[fields]=result.join(',')
                         this.$emit('handle-search','batch',obj)
                         this.visible = false;
-                    }else if(Array.isArray(arr1)&&arr1.length>this.maxBatch){
-                        this.$message.error('批量查询最多只能查询'+this.maxBatch+'条数据哦');
-                        return
                     }else{
                         this.$message.error('您还没有输入查询信息')
                     } 

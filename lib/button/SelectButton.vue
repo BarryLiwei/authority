@@ -17,6 +17,11 @@ export default {
              type:String,
              default:'mini'
          }
+     },
+     data(){
+         return {
+             
+         }
      }
 }
 </script>
@@ -27,14 +32,19 @@ export default {
         color: #fff;
     }
     /deep/ .el-button:active {
-        background-color: #5b81fe;
-        border-color: #5b81fe;
-        color: #fff;
+        background-color: #5b81fe !important;
+        border-color: #5b81fe !important;
+        color: #fff !important;
     }
     /deep/ .el-button:focus, .el-button:hover {
-        background-color: #5b81fe;
-        border-color: #5b81fe;
-        color: #fff;
+        background-color: #5b81fe !important;
+        border-color: #5b81fe !important;
+        color: #fff !important;
+    }
+    .el-button:focus, .el-button:hover {
+        background-color: #5b81fe !important;
+        border-color: #5b81fe !important;
+        color: #fff !important;
     }
 </style>
 

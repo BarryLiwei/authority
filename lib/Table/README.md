@@ -8,7 +8,7 @@ element 升级到了 2.0 了， 不用担心可以直接用。
 
 > `npm i element-ui -S`
 
-安装 uebPlug:
+安装 egrid:
 
 > `npm i ueb-plug -S`
 
@@ -19,7 +19,7 @@ element 升级到了 2.0 了， 不用担心可以直接用。
 
 ```javascript
 import Vue from 'vue'
-import uebPlug from 'ueb-plug'
+import Egrid from 'egrid'
 
 // table 的样式需要手动引入
 import 'element-ui/lib/theme-default/icon.css'

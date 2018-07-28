@@ -4,7 +4,7 @@
             <slot></slot>
         </el-col>
         <el-col :span="12" class="operation-right" >
-            <el-dropdown @command="handleExport">
+            <el-dropdown @command="handleExport" v-if="isExport">
                 <el-button plain style="width: 100px;" size="mini" class="el-dropdown-link">
                     导入导出<i class="el-icon-arrow-down el-icon--right"></i>
                 </el-button>
@@ -41,7 +41,10 @@
                 type:String,
                 default:''
             },
-
+            isExport:{
+                type:Boolean,
+                default:true
+            }
         },
         data(){
             return {
@@ -125,7 +128,8 @@
 </script>
 <style lang="less" scoped>
 .operation{
-    height: 50px;
+    height: 10px !important;
+    max-height: 50px;
     line-height: 50px;
     .operation-left{
         text-align:left;
